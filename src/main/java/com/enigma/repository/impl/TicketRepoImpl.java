@@ -1,5 +1,6 @@
 package com.enigma.repository.impl;
 
+import com.enigma.entity.Seat;
 import com.enigma.entity.Ticket;
 import com.enigma.repository.TicketRepo;
 
@@ -39,7 +40,7 @@ public class TicketRepoImpl implements TicketRepo {
     public Ticket getById(Integer id) {
         Ticket ticket = null;
         try {
-            PreparedStatement pr = conn.prepareStatement("select ts.id, ts.seat_number, c.name from trx_ticket txs join t_seat ts on txs.seat_id = ts.id join m_customer c on txs.customer_id = c.id where ts.id =" + id + ";");
+            PreparedStatement pr = conn.prepareStatement("select txs.id, ts.seat_number, c.name from trx_ticket txs join t_seat ts on txs.seat_id = ts.id join m_customer c on txs.customer_id = c.id where txs.id =" + id + ";");
             ResultSet result = pr.executeQuery();
             while (result.next()) {
                 ticket = new Ticket(result.getInt("id"), result.getString("seat_number"),result.getString("name"));
@@ -62,6 +63,7 @@ public class TicketRepoImpl implements TicketRepo {
                 pr.setInt(2, ticket.getCustomerId());
                 pr.executeUpdate();
                 pr.close();
+
                 List<Ticket> tickets = getAll();
                 int trxId =  tickets.get(tickets.size()-1).getId();
                 PreparedStatement getTheaterId = conn.prepareStatement("select txs.*,ts.*, tt.* from trx_ticket txs right join t_seat ts on txs.seat_id = ts.id right join t_theater tt on ts.theater_id = tt.id where txs.id= " + trxId + ";");
@@ -70,6 +72,7 @@ public class TicketRepoImpl implements TicketRepo {
                 while (resultId.next()) {
                     theaterId = resultId.getInt("theater_id");
                 }
+
                 if (theaterId != 0) {
                     PreparedStatement pr2 = conn.prepareStatement("update t_theater set stock = (stock - 1) where id="+ theaterId +";");
                     pr2.executeUpdate();
@@ -94,11 +97,9 @@ public class TicketRepoImpl implements TicketRepo {
             PreparedStatement getAge = conn.prepareStatement("select * from m_customer where id=?;");
             getAge.setInt(1,ticket.getCustomerId());
             ResultSet resultAge = getAge.executeQuery();
-
             while (resultAge.next()) {
                 birthdate = resultAge.getDate("birth_date").toLocalDate();
             }
-
             if (birthdate != null) {
                 Period period = Period.between(birthdate, LocalDate.now());
                 age = period.getYears();
@@ -134,24 +135,23 @@ public class TicketRepoImpl implements TicketRepo {
     public void update(Ticket ticket) {
         Ticket tickets;
         tickets = getById(ticket.getId());
-        if (tickets == null) {
-            System.out.println("Cannot update ticket");
-        } else {
             try{
-                PreparedStatement pr = conn.prepareStatement("update trx_ticket set seat_id=?, customer_id=? where id=?;");
-                pr.setInt(1, ticket.getSeatId());
-                pr.setInt(2, ticket.getCustomerId());
-                pr.setInt(3, ticket.getId());
+                if (tickets != null) {
+                    PreparedStatement pr = conn.prepareStatement("update trx_ticket set seat_id=?, customer_id=? where id=?;");
+                    pr.setInt(1, ticket.getSeatId());
+                    pr.setInt(2, ticket.getCustomerId());
+                    pr.setInt(3, ticket.getId());
 
-                int updated = pr.executeUpdate();
-                System.out.println(updated > 0 ? "success update ticket" : "no data ticket updated");
-                pr.close();
-
+                    int updated = pr.executeUpdate();
+                    System.out.println(updated > 0 ? "success update ticket" : "no data ticket updated");
+                    pr.close();
+                } else {
+                    System.out.println("Cannot update ticket");
+                }
             } catch (SQLException e) {
                 System.out.println("Failed update : " +e.getMessage());
             }
-        }
-        
+
     }
 
     @Override

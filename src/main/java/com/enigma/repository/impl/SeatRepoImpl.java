@@ -69,9 +69,10 @@ public class SeatRepoImpl implements SeatRepo  {
 
     @Override
     public void update(Seat seat) {
-        seat = getById(seat.getId());
+        Seat seatUpdate;
+        seatUpdate = getById(seat.getId());
         try{
-            if (seat == null) {
+            if (seatUpdate == null) {
                 System.out.println("Cannot update seat");
             } else {
                 PreparedStatement pr = conn.prepareStatement("update t_seat set seat_number=?, theater_id=? where id=?;");
