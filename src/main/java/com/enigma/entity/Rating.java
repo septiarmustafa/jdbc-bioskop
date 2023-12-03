@@ -45,10 +45,10 @@ public class Rating {
 
     @Override
     public String toString() {
-        return "Rating{" +
+        return "Rating" +
                 "id=" + id +
-                ", code='" + code + '\'' +
-                ", desc='" + desc + '\'' +
-                '}';
+                ", code=" + code +
+                ", desc='" + desc + '\''
+                ;
     }
 }

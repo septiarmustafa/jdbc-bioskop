@@ -7,8 +7,13 @@ public class Ticket {
     private String customerName;
     private String seatName;
 
+    public Ticket(Integer id, Integer seatId, Integer customerId) {
+        this.id = id;
+        this.seatId = seatId;
+        this.customerId = customerId;
+    }
 
-    public Ticket(Integer id,  String seatName, String customerName) {
+    public Ticket(Integer id, String seatName, String customerName) {
         this.id = id;
         this.customerName = customerName;
         this.seatName = seatName;
@@ -49,10 +54,9 @@ public class Ticket {
 
     @Override
     public String toString() {
-        return "Ticket{" +
+        return "Ticket : " +
                 "id=" + id +
                 ", seat=" + seatName +
-                ", customer=" + customerName +
-                '}';
+                ", customer=" + customerName;
     }
 }

@@ -5,7 +5,6 @@ import com.enigma.repository.CustomerRepo;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 
 public class CustomerRepoImpl implements CustomerRepo {
 
@@ -14,8 +13,7 @@ public class CustomerRepoImpl implements CustomerRepo {
     public CustomerRepoImpl(Connection conn) {
         this.conn = conn;
     }
-    public CustomerRepoImpl() {
-    }
+
 
     @Override
     public void getAll() {
@@ -26,7 +24,7 @@ public class CustomerRepoImpl implements CustomerRepo {
             while (result.next()) {
                 data.add(new Customer(result.getString("name"),result.getString("birth_date")));
             }
-            getListCustomer(data);
+            getList(data);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -41,6 +39,7 @@ public class CustomerRepoImpl implements CustomerRepo {
             while (result.next()) {
                 customer = new Customer(result.getInt("id"),result.getString("name"),result.getString("birth_date"));
             }
+            System.out.println(customer == null ? "Customer not found" : "Found " + customer);
             pr.close();
         } catch (SQLException e){
             System.out.println("Failed get data customer by Id " + e.getMessage());
@@ -55,47 +54,55 @@ public class CustomerRepoImpl implements CustomerRepo {
             pr.setString(1,customer.getName());
             pr.setDate(2,Date.valueOf(customer.getBirth_date()));
             pr.executeUpdate();
-            System.out.println("success add new data : " + customer.getName());
+            System.out.println("success add new customer:  Name= " + customer.getName() + " Birthdate= " + customer.getBirth_date());
             pr.close();
         } catch (SQLException e) {
-            System.out.println("failed save data : "+e.getMessage());
+            System.out.println("failed save customer : "+e.getMessage());
         }
     }
 
     @Override
     public void update(Customer customer) {
-        try{
-            PreparedStatement pr = conn.prepareStatement("update m_customer set name=?, birth_date=? where id=?;");
-            pr.setString(1,customer.getName());
-            pr.setDate(2,Date.valueOf(customer.getBirth_date()));
-            pr.setInt(3,customer.getId());
+       Customer cust;
+        cust = getById(customer.getId());
+        if (cust == null) {
+            System.out.println("Cannot update customer");
+        } else {
+            try{
+                PreparedStatement pr = conn.prepareStatement("update m_customer set name=?, birth_date=? where id=?;");
+                pr.setString(1,customer.getName());
+                pr.setDate(2,Date.valueOf(customer.getBirth_date()));
+                pr.setInt(3,customer.getId());
 
-            int updated = pr.executeUpdate();
-            if (updated > 0) System.out.println("success update data");
-            else System.out.println("no data updated");
-            pr.close();
+                int updated = pr.executeUpdate();
+                System.out.println(updated > 0 ? "success update customer " + customer.getName() : "no data updated");
+                pr.close();
 
-        } catch (SQLException e) {
-            System.out.println("Failed update : " +e.getMessage());
+            } catch (SQLException e) {
+                System.out.println("Failed update : " +e.getMessage());
+            }
         }
-
     }
 
     @Override
     public void delete(Integer id) {
-        try {
-            PreparedStatement pr = conn.prepareStatement("DELETE from m_customer WHERE id =" + id + ";");
-            int updated = pr.executeUpdate();
-            if (updated > 0) System.out.println("success delete data");
-            else System.out.println("no data deleted");
-            pr.close();
+        Customer customer = getById(id);
+        if (customer != null) {
+            try {
+                PreparedStatement pr = conn.prepareStatement("DELETE from m_customer WHERE id =" + id + ";");
+                int updated = pr.executeUpdate();
+                System.out.println(updated > 0 ? "success delete customer" : "no customer deleted");
+                pr.close();
 
-        } catch (SQLException e){
-            System.out.println("Failed delete : " + e.getMessage());
+            } catch (SQLException e){
+                System.out.println("Failed delete : " + e.getMessage());
+            }
+        } else {
+            System.out.println("Cannot delete customer");
         }
     }
 
-    public void getListCustomer(ArrayList<Customer> list){
+    public void getList(ArrayList<Customer> list){
         System.out.println("\nList Customer: ");
         int index = 0;
         try {

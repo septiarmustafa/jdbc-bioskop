@@ -1,7 +1,5 @@
 package com.enigma.repository.impl;
 
-import com.enigma.entity.Customer;
-import com.enigma.entity.Seat;
 import com.enigma.entity.Theater;
 import com.enigma.repository.TheaterRepo;
 
@@ -10,7 +8,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class TheaterRepoImpl implements TheaterRepo {
 
@@ -21,18 +18,18 @@ public class TheaterRepoImpl implements TheaterRepo {
     }
 
     @Override
-    public List<Theater> getAll() {
-        List<Theater> data = new ArrayList<>();
+    public void getAll() {
+        ArrayList<Theater> data = new ArrayList<>();
         try{
             PreparedStatement pr = conn.prepareStatement("select tt.*, tf.title from t_theater tt join t_film tf on tt.film_id = tf.id;");
             ResultSet result = pr.executeQuery();
             while (result.next()) {
                 data.add(new Theater(result.getInt("id"), result.getString("theater_number"), result.getInt("stock"),result.getString("title")));
             }
+            getList(data);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return data;
     }
 
     @Override
@@ -44,6 +41,7 @@ public class TheaterRepoImpl implements TheaterRepo {
             while (result.next()) {
                 theater = new Theater(result.getInt("id"), result.getString("theater_number"), result.getInt("stock"),result.getString("title"));
             }
+            System.out.println(theater == null ? "Theater not found" : "Found " + theater);
             pr.close();
         } catch (SQLException e){
             System.out.println("Failed get data by Id " + e.getMessage());
@@ -58,8 +56,6 @@ public class TheaterRepoImpl implements TheaterRepo {
             pr.setString(1,theater.getTheaterNumber());
             pr.setInt(2, theater.getStock());
             pr.setInt(3, theater.getFilmId());
-
-
             pr.executeUpdate();
             System.out.println("success add new data : " + theater.getTheaterNumber());
             pr.close();
@@ -70,33 +66,57 @@ public class TheaterRepoImpl implements TheaterRepo {
 
     @Override
     public void update(Theater theater) {
-        try{
-            PreparedStatement pr = conn.prepareStatement("update t_theater set theater_number=?, stock=?, film_id=? where id=?;");
-            pr.setString(1, theater.getTheaterNumber());
-            pr.setInt(2, theater.getStock());
-            pr.setInt(3, theater.getFilmId());
-            pr.setInt(4, theater.getId());
-            int updated = pr.executeUpdate();
-            if (updated > 0) System.out.println("success update data");
-            else System.out.println("no data updated");
-            pr.close();
-
-        } catch (SQLException e) {
-            System.out.println("Failed update : " +e.getMessage());
+        Theater theaters;
+        theaters = getById(theater.getId());
+        if (theaters == null) {
+            System.out.println("Cannot update theater");
+        } else {
+            try{
+                PreparedStatement pr = conn.prepareStatement("update t_theater set theater_number=?, stock=?, film_id=? where id=?;");
+                pr.setString(1, theater.getTheaterNumber());
+                pr.setInt(2, theater.getStock());
+                pr.setInt(3, theater.getFilmId());
+                pr.setInt(4, theater.getId());
+                int updated = pr.executeUpdate();
+                System.out.println(updated > 0 ? "success update theater" : "no data theater updated");
+                pr.close();
+            } catch (SQLException e) {
+                System.out.println("Failed update : " +e.getMessage());
+            }
         }
     }
 
     @Override
     public void delete(Integer id) {
+        Theater theater = getById(id);
         try {
-            PreparedStatement pr = conn.prepareStatement("DELETE from t_theater WHERE id =" + id + ";");
-            int updated = pr.executeUpdate();
-            if (updated > 0) System.out.println("success delete data");
-            else System.out.println("no data deleted");
-            pr.close();
+            if (theater != null) {
+                PreparedStatement pr = conn.prepareStatement("DELETE from t_theater WHERE id =" + id + ";");
+                int updated = pr.executeUpdate();
+                System.out.println(updated > 0 ? "success delete theater" : "no data theater deleted");
+                pr.close();
+            } else  {
+                System.out.println("Cannot delete theater");
+            }
+
 
         } catch (SQLException e){
             System.out.println("Failed delete : " + e.getMessage());
+        }
+    }
+
+    public void getList(ArrayList<Theater> list){
+        System.out.println("\nList Theater: ");
+        int index = 0;
+        try {
+            for (Theater theater: list) {
+                Theater theaters;
+                index++;
+                theaters = theater;
+                System.out.println(theaters == null ? "There's no theater\n" : index +". " + theaters);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -7,18 +7,24 @@ public class Theater {
     private Integer filmId;
     private String filmTitle;
 
-    public Theater(Integer id, String theaterNumber, Integer stock, Integer filmId, String filmTitle) {
-        this.id = id;
-        this.theaterNumber = theaterNumber;
-        this.stock = stock;
-        this.filmId = filmId;
-        this.filmTitle = filmTitle;
-    }
     public Theater(Integer id, String theaterNumber, Integer stock,  String filmTitle) {
         this.id = id;
         this.theaterNumber = theaterNumber;
         this.stock = stock;
         this.filmTitle = filmTitle;
+    }
+
+    public Theater(String theaterNumber, Integer stock, Integer filmId) {
+        this.theaterNumber = theaterNumber;
+        this.stock = stock;
+        this.filmId = filmId;
+    }
+
+    public Theater(Integer id, String theaterNumber, Integer stock, Integer filmId) {
+        this.id = id;
+        this.theaterNumber = theaterNumber;
+        this.stock = stock;
+        this.filmId = filmId;
     }
 
     public Theater() {
@@ -58,11 +64,11 @@ public class Theater {
 
     @Override
     public String toString() {
-        return "Theater{" +
+        return "Theater : " +
                 "id=" + id +
-                ", theaterNumber='" + theaterNumber + '\'' +
+                ", theater number=" + theaterNumber +
                 ", stock=" + stock +
-                ", filmTitle=" + filmTitle +
-                '}';
+                ", film title=" + filmTitle
+                ;
     }
 }

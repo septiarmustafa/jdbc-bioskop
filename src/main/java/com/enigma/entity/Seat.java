@@ -13,6 +13,17 @@ public class Seat {
         this.theaterNumber = theaterNumber;
     }
 
+    public Seat(Integer id, String seatNumber, Integer theaterId) {
+        this.id = id;
+        this.seatNumber = seatNumber;
+        this.theaterId = theaterId;
+    }
+
+    public Seat(String seatNumber, Integer theaterId) {
+        this.seatNumber = seatNumber;
+        this.theaterId = theaterId;
+    }
+
     public Seat() {
     }
 
@@ -42,10 +53,10 @@ public class Seat {
 
     @Override
     public String toString() {
-        return "Seat{" +
-                "id=" + id +
-                ", seatNumber='" + seatNumber + '\'' +
-                ", theaterNumber=" + theaterNumber +
-                '}';
+        return "Seat : " +
+                "id= " + id +
+                ", seat number= " + seatNumber +
+                ", theater number= " + theaterNumber
+                ;
     }
 }

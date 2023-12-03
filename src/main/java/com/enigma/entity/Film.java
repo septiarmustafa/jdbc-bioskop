@@ -19,6 +19,23 @@ public class Film {
         this.code = code;
     }
 
+    public Film(Integer id, String title, Integer duration, String showDate, Integer price, Integer ratingId) {
+        this.id = id;
+        this.title = title;
+        this.duration = duration;
+        this.showDate = showDate;
+        this.price = price;
+        this.ratingId = ratingId;
+    }
+
+    public Film(String title, Integer duration, String showDate, Integer price, Integer ratingId) {
+        this.title = title;
+        this.duration = duration;
+        this.showDate = showDate;
+        this.price = price;
+        this.ratingId = ratingId;
+    }
+
     public Film() {
     }
 
@@ -72,13 +89,13 @@ public class Film {
 
     @Override
     public String toString() {
-        return "Film{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", duration=" + duration +
-                ", showDate='" + showDate + '\'' +
-                ", price=" + price +
-                ", rating=" + code +
-                '}';
+        return "Film : " +
+                "id= " + id +
+                ", title= '" + title + '\'' +
+                ", duration= " + duration +
+                ", showDate= " + showDate +
+                ", price= " + price +
+                ", rating= " + code
+                ;
     }
 }

@@ -46,9 +46,8 @@ public class Customer {
 
     @Override
     public String toString() {
-        return "Customer{" +
-                "name='" + name + '\'' +
-                ", birth_date='" + birth_date + '\'' +
-                '}';
+        return "Customer : " +
+                "name= " + name +
+                ", birth_date= " + birth_date ;
     }
 }

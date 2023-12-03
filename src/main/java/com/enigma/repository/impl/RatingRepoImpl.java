@@ -1,12 +1,10 @@
 package com.enigma.repository.impl;
 
-import com.enigma.entity.Customer;
 import com.enigma.entity.Rating;
 import com.enigma.repository.RatingRepo;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 
 public class RatingRepoImpl implements RatingRepo {
 
@@ -17,18 +15,18 @@ public class RatingRepoImpl implements RatingRepo {
     }
 
     @Override
-    public List<Rating> getAll() {
-        List<Rating> data = new ArrayList<>();
+    public void getAll() {
+        ArrayList<Rating> data = new ArrayList<>();
         try{
             PreparedStatement pr = conn.prepareStatement("select * from t_rating;");
             ResultSet result = pr.executeQuery();
             while (result.next()) {
-                data.add(new Rating(result.getString("code"),result.getString("description")));
+                data.add(new Rating(result.getInt("id"), result.getString("code"),result.getString("description")));
             }
+            getList(data);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return data;
     }
 
     @Override
@@ -40,9 +38,10 @@ public class RatingRepoImpl implements RatingRepo {
             while (result.next()) {
                 rating = new Rating(result.getInt("id"),result.getString("code"),result.getString("description"));
             }
+            System.out.println(rating == null ? "Rating not found" : "Found " + rating);
             pr.close();
         } catch (SQLException e){
-            System.out.println("Failed get data by Id " + e.getMessage());
+            System.out.println("Failed get rating by Id " + e.getMessage());
         }
         return rating;
     }
@@ -64,34 +63,58 @@ public class RatingRepoImpl implements RatingRepo {
 
     @Override
     public void update(Rating rating) {
-        try{
-            PreparedStatement pr = conn.prepareStatement("update t_rating set code=?, description=? where id=?;");
-            pr.setString(1,rating.getCode());
-            pr.setString(2,rating.getDesc());
-            pr.setInt(3,rating.getId());
+        Rating rate;
+        rate = getById(rating.getId());
+        if (rate == null) {
+            System.out.println("Cannot update rating");
+        } else {
+            try{
+                PreparedStatement pr = conn.prepareStatement("update t_rating set code=?, description=? where id=?;");
+                pr.setString(1,rating.getCode());
+                pr.setString(2,rating.getDesc());
+                pr.setInt(3,rating.getId());
 
-            int updated = pr.executeUpdate();
-            if (updated > 0) System.out.println("success update data");
-            else System.out.println("no data updated");
-            pr.close();
+                int updated = pr.executeUpdate();
+                if (updated > 0) System.out.println("success update rating");
+                else System.out.println("no data rating updated");
+                pr.close();
 
-        } catch (SQLException e) {
-            System.out.println("Failed update : " +e.getMessage());
+            } catch (SQLException e) {
+                System.out.println("Failed update : " +e.getMessage());
+            }
         }
 
     }
 
     @Override
     public void delete(Integer id) {
+        Rating rating = getById(id);
         try {
-            PreparedStatement pr = conn.prepareStatement("DELETE from t_rating WHERE id =" + id + ";");
-            int updated = pr.executeUpdate();
-            if (updated > 0) System.out.println("success delete data");
-            else System.out.println("no data deleted");
-            pr.close();
-
+            if (rating != null) {
+                PreparedStatement pr = conn.prepareStatement("DELETE from t_rating WHERE id =" + id + ";");
+                int updated = pr.executeUpdate();
+                System.out.println(updated > 0 ? "success delete data" :"no data deleted" );
+                pr.close();
+            } else  {
+                System.out.println("Cannot delete rating");
+            }
         } catch (SQLException e){
             System.out.println("Failed delete : " + e.getMessage());
+        }
+    }
+
+    public void getList(ArrayList<Rating> list){
+        System.out.println("\nList Rating: ");
+        int index = 0;
+        try {
+            for (Rating rating: list) {
+                Rating ratings;
+                index++;
+                ratings = rating;
+                System.out.println(ratings == null ? "There's no rating\n" : index +". " + ratings);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 }

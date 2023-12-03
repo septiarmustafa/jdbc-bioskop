@@ -1,6 +1,5 @@
 package com.enigma.repository.impl;
 
-import com.enigma.entity.Seat;
 import com.enigma.entity.Ticket;
 import com.enigma.repository.TicketRepo;
 
@@ -9,10 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class TicketRepoImpl implements TicketRepo {
@@ -24,13 +21,14 @@ public class TicketRepoImpl implements TicketRepo {
 
     @Override
     public List<Ticket> getAll() {
-        List<Ticket> data = new ArrayList<>();
+        ArrayList<Ticket> data = new ArrayList<>();
         try{
             PreparedStatement pr = conn.prepareStatement("select txs.id, ts.seat_number, c.name from trx_ticket txs join t_seat ts on txs.seat_id = ts.id join m_customer c on txs.customer_id = c.id;");
             ResultSet result = pr.executeQuery();
             while (result.next()) {
                 data.add(new Ticket(result.getInt("id"), result.getString("seat_number"), result.getString("name")));
             }
+//            getList(data);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -46,8 +44,8 @@ public class TicketRepoImpl implements TicketRepo {
             while (result.next()) {
                 ticket = new Ticket(result.getInt("id"), result.getString("seat_number"),result.getString("name"));
             }
+            System.out.println(ticket == null ? "Ticket not found" : "Found " + ticket);
             pr.close();
-            System.out.println("Found : " + ticket );
         } catch (SQLException e){
             System.out.println("Failed get data by Id " + e.getMessage());
         }
@@ -83,7 +81,7 @@ public class TicketRepoImpl implements TicketRepo {
 
         } catch (SQLException e) {
             conn.rollback();
-            System.out.println("failed save data : "+e.getMessage());
+            System.out.println("failed save data ticket : "+e.getMessage());
         }
         conn.setAutoCommit(true);
 
@@ -134,33 +132,59 @@ public class TicketRepoImpl implements TicketRepo {
 
     @Override
     public void update(Ticket ticket) {
-        try{
-            PreparedStatement pr = conn.prepareStatement("update trx_ticket set seat_id=?, customer_id=? where id=?;");
-            pr.setInt(1, ticket.getSeatId());
-            pr.setInt(2, ticket.getCustomerId());
-            pr.setInt(3, ticket.getId());
+        Ticket tickets;
+        tickets = getById(ticket.getId());
+        if (tickets == null) {
+            System.out.println("Cannot update ticket");
+        } else {
+            try{
+                PreparedStatement pr = conn.prepareStatement("update trx_ticket set seat_id=?, customer_id=? where id=?;");
+                pr.setInt(1, ticket.getSeatId());
+                pr.setInt(2, ticket.getCustomerId());
+                pr.setInt(3, ticket.getId());
 
-            int updated = pr.executeUpdate();
-            if (updated > 0) System.out.println("success update data");
-            else System.out.println("no data updated");
-            pr.close();
+                int updated = pr.executeUpdate();
+                System.out.println(updated > 0 ? "success update ticket" : "no data ticket updated");
+                pr.close();
 
-        } catch (SQLException e) {
-            System.out.println("Failed update : " +e.getMessage());
+            } catch (SQLException e) {
+                System.out.println("Failed update : " +e.getMessage());
+            }
         }
+        
     }
 
     @Override
     public void delete(Integer id) {
-        try {
-            PreparedStatement pr = conn.prepareStatement("DELETE from trx_ticket WHERE id =" + id + ";");
-            int updated = pr.executeUpdate();
-            if (updated > 0) System.out.println("success delete data");
-            else System.out.println("no data deleted");
-            pr.close();
+        Ticket ticket = getById(id);
+        if (ticket != null ){
+            try {
+                PreparedStatement pr = conn.prepareStatement("DELETE from trx_ticket WHERE id =" + id + ";");
+                int updated = pr.executeUpdate();
+                System.out.println(updated > 0 ? "success delete ticket" : "no ticket deleted");
+                pr.close();
 
-        } catch (SQLException e){
-            System.out.println("Failed delete : " + e.getMessage());
+            } catch (SQLException e){
+                System.out.println("Failed delete : " + e.getMessage());
+            }
+        }else  {
+            System.out.println("Cannot delete ticket");
+        }
+        
+    }
+
+    public void getList(List<Ticket> list){
+        System.out.println("\nList Ticket: ");
+        int index = 0;
+        try {
+            for (Ticket ticket: list) {
+                Ticket tickets;
+                index++;
+                tickets = ticket;
+                System.out.println(tickets == null ? "There's no ticket\n" : index +". " + tickets);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 }
